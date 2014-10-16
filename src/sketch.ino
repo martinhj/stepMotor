@@ -17,14 +17,10 @@ void setup() {
 void loop() {
   // step one step:
   myStepper.setSpeed(100);
-  if (direction) {
+  if (direction = direction ? false : true) {
     myStepper.step(stepsPerRevolution * 2);
   } else {
     myStepper.step(-stepsPerRevolution * 2);
   }
-  Serial.print("steps:" );
-  Serial.println(stepCount);
-  stepCount++;
-  direction = direction ? false : true;
   delay(500);
 }
