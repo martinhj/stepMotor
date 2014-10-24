@@ -1,32 +1,40 @@
-#include <Stepper.h>
+// MultiStepper.pde
+// -*- mode: C++ -*-
+//
+// Shows how to multiple simultaneous steppers
+// Runs one stepper forwards and backwards, accelerating and decelerating
+// at the limits. Runs other steppers at the same time
+//
+// Copyright (C) 2009 Mike McCauley
+// $Id: MultiStepper.pde,v 1.1 2011/01/05 01:51:01 mikem Exp mikem $
 
-const int stepsPerRevolution = 200;  // change this to fit the number of steps per revolution
-// for your motor
+#include <AccelStepper.h>
 
-// initialize the stepper library on pins 8 through 11:
-Stepper myStepper(stepsPerRevolution, 8,9,10,11);            
+// Define some steppers and the pins the will use
+/* name one of them something with right and one left.
+ * One should be inverse.
+ */
+AccelStepper stepper1(AccelStepper::FULL4WIRE, 3, 4, 5, 6);
+AccelStepper stepper2(AccelStepper::FULL4WIRE, 8, 9, 10, 11);
 
-int stepCount = 0;         // number of steps the motor has taken
-boolean direction = true;
-
-void setup() {
-  // initialize the serial port:
-  pinMode(13, OUTPUT);
-  Serial.begin(9600);
-  Serial.println("starting");
-  myStepper.setSpeed(150);
+void setup()
+{  
+    stepper1.setMaxSpeed(200.0);
+    stepper1.setAcceleration(200.0);
+    stepper1.moveTo(24);
+    
+    stepper2.setMaxSpeed(200.0);
+    stepper2.setAcceleration(200.0);
+    stepper2.moveTo(-80);
 }
 
-void loop() {
-  // step one step:
-  if (direction = direction ? false : true) {
-    myStepper.step(stepsPerRevolution*30);
-    Serial.println("step+");
-    digitalWrite(13, HIGH);
-  } else {
-    myStepper.step(-stepsPerRevolution*30);
-    digitalWrite(13, LOW);
-    Serial.println("step-");
-  }
-  delay(100);
+void loop()
+{
+    // Change direction at the limits
+    if (stepper1.distanceToGo() == 0)
+      stepper1.moveTo(-stepper1.currentPosition());
+    if (stepper2.distanceToGo() == 0)
+      stepper2.moveTo(-stepper2.currentPosition());
+    stepper1.run();
+    stepper2.run();
 }
