@@ -15,11 +15,19 @@
  * One should be inverse.
  */
 
+char tagString[13];
+int index = 0;
+boolean reading = false;
 
 AccelStepper stepper1(AccelStepper::FULL4WIRE, 3, 4, 5, 6);
 AccelStepper stepper2(AccelStepper::FULL4WIRE, 8, 9, 10, 11);
 
 int x1, x2;
+
+unsigned long lastRead;
+int RFIDResetPin = 13;
+int RFIDResetPin2 = 12;
+int x1rfidtarget, x2rfidtarget;
 
 void setup()
 {  
@@ -32,17 +40,26 @@ void setup()
 
 	stepper2.setMaxSpeed(200.0);
 	stepper2.setAcceleration(200.0);
+
+  pinMode(RFIDResetPin, OUTPUT);
+  pinMode(RFIDResetPin2, OUTPUT);
 }
 
 
 
-void loop()
-{
-  char tagString[13];
-  int index = 0;
-  boolean reading = false;
+void readCard() {
 
-  delay(150);
+  Serial.println("rfid_READ");
+  index = 0;
+  x1rfidtarget = stepper1.targetPosition();
+  x2rfidtarget = stepper1.targetPosition();
+  stepper1.runToNewPosition(0);
+  stepper2.runToNewPosition(0);
+  turnOffMotors();
+
+  digitalWrite(RFIDResetPin, LOW);
+  digitalWrite(RFIDResetPin2, HIGH);
+  delay(200);
   while(Serial.available()){
 
     int readByte = Serial.read(); //read next available byte
@@ -56,13 +73,46 @@ void loop()
       index ++;
     }
   }
-  
   checkTag(tagString);
   clearTag(tagString);
+
+  index = 0;
+  digitalWrite(RFIDResetPin, HIGH);
+  digitalWrite(RFIDResetPin2, LOW);
+  delay(200);
+  while(Serial.available()){
+
+    int readByte = Serial.read(); //read next available byte
+
+    if(readByte == 2) reading = true; //begining of tag
+    if(readByte == 3) reading = false; //end of tag
+
+    if(reading && readByte != 2 && readByte != 10 && readByte != 13){
+      //store the tag
+      tagString[index] = readByte;
+      index ++;
+    }
+  }
+
+  checkTag(tagString); //Check if it is a match
+  clearTag(tagString); //Clear the char of all value
+
+  stepper1.runToNewPosition(x1rfidtarget);
+  stepper2.runToNewPosition(x2rfidtarget);
+
+
+  lastRead = millis();
+}
+
+void loop()
+{
+  if (millis() - lastRead > 10000) readCard();
+  
 
 		x1 = analogRead(2);
 		x2 = analogRead(1);
 
+    ///*
     Serial.print(x1);
     Serial.print(" : ");
     Serial.print(x2);
@@ -76,6 +126,7 @@ void loop()
     Serial.print(stepper2.currentPosition());
 
     Serial.println();
+    //*/
 
     /*
     // Change direction at the limits
@@ -142,6 +193,9 @@ void checkTag(char tag[]){
   Serial.println(tag); //read out any unknown tag
 
 }
+
+
+
 
 
 
