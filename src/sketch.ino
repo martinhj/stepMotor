@@ -226,6 +226,7 @@ void checkTag(char tag[]){
 
   if(compareTag(tag, tag10)){
     lightLED(13);
+  }
   Serial.println(tag); //read out any unknown tag
 
 }
