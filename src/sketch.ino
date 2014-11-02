@@ -23,6 +23,11 @@ boolean reading = false;
  * Test how HALF4WIRE works out instead of FULL4WIRE. Speed difference? Different 
  * step count to get one revolution - doubled?
  */
+
+/*
+ * Added 'false' as a last argument. will not enable the motors until it's
+ * started with enableOutputs() later.
+ */
 AccelStepper stepper1(AccelStepper::FULL4WIRE, 3, 4, 5, 6);
 AccelStepper stepper2(AccelStepper::FULL4WIRE, 8, 9, 10, 11);
 
@@ -65,8 +70,14 @@ void readCard() {
    */
 
   /*
-   * Need to use a led to confirm that a tag has been identified succesfully when
+   * Need to use a led to confirm that a tag has been identified successfully when
    * running on battery and not reading the serial data.
+   */
+
+
+  /*
+   * Reset position with setCurrentPosition(0) when a tag has been identified
+   * successfully.
    */
 
   Serial.println("rfid_READ");
