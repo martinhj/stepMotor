@@ -15,9 +15,6 @@
  * One should be inverse.
  */
 
-char tagString[13];
-int index = 0;
-boolean reading = false;
 
 /*
  * Test how HALF4WIRE works out instead of FULL4WIRE. Speed difference? Different 
@@ -34,9 +31,14 @@ AccelStepper stepper2(AccelStepper::FULL4WIRE, 8, 9, 10, 11);
 int x1, x2;
 
 unsigned long lastRead;
-int RFIDResetPin = 13;
+int RFIDResetPin = 2;
 int RFIDResetPin2 = 12;
 int x1rfidtarget, x2rfidtarget;
+char tag10[13] = "04161F27FDD7";
+int ledPin = 13;
+char tagString[13];
+int index = 0;
+boolean reading = false;
 
 void setup()
 {  
@@ -52,6 +54,7 @@ void setup()
 
   pinMode(RFIDResetPin, OUTPUT);
   pinMode(RFIDResetPin2, OUTPUT);
+  pinMode(ledPin, OUTPUT);
 }
 
 
@@ -221,8 +224,25 @@ void checkTag(char tag[]){
 
   if(strlen(tag) == 0) return; //empty, no need to contunue
 
+  if(compareTag(tag, tag10)){
+    lightLED(13);
   Serial.println(tag); //read out any unknown tag
 
+}
+
+boolean compareTag(char one[], char two[]){
+///////////////////////////////////
+//compare two value to see if same,
+//strcmp not working 100% so we do this
+///////////////////////////////////
+
+  if(strlen(one) == 0) return false; //empty
+
+  for(int i = 0; i < 12; i++){
+    if(one[i] != two[i]) return false;
+  }
+
+  return true; //no mismatches
 }
 
 
@@ -283,6 +303,11 @@ void turnOffMotors() {
    * void AccelStepper::disableOutputs  (   ) 
    * use this one instead (and enableOutputs).
    */
+  /*
+  stepper1.disableOutputs();
+  stepper2.disableOutputs();
+  */
+  ///*
   digitalWrite(3, LOW);
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
@@ -291,5 +316,6 @@ void turnOffMotors() {
   digitalWrite(9, LOW);
   digitalWrite(10, LOW);
   digitalWrite(11, LOW);
+  //*/
 }
 
