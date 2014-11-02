@@ -49,13 +49,29 @@ void setup()
 
 void readCard() {
 
+  /*
+   * This function need to connect different tags to different behavior. Store
+   * tags and where to move to connected to those.
+   */
+
+  /*
+   * Stops the motor if it does not find a rfid tag. (disableOutputs).
+   * (or, don't start it again. start motors with enableOutputs when a rfid tag
+   * is found.
+   */
+
+  /*
+   * Need to use a led to confirm that a tag has been identified succesfully when
+   * running on battery and not reading the serial data.
+   */
+
   Serial.println("rfid_READ");
   index = 0;
   x1rfidtarget = stepper1.targetPosition();
   x2rfidtarget = stepper1.targetPosition();
   stepper1.runToNewPosition(0);
   stepper2.runToNewPosition(0);
-  turnOffMotors();
+  turnOffMotors(); // needs a turnonmotors as well when using disableOutputs.
 
   digitalWrite(RFIDResetPin, LOW);
   digitalWrite(RFIDResetPin2, HIGH);
@@ -200,6 +216,19 @@ void checkTag(char tag[]){
 
 
 void upperWave(AccelStepper &stepper) {
+  /*
+   * These functions needs to be generalized. Take in a start and a stop
+   * position and state if it's going to keep rotating.
+   */
+  /*
+   * || stepper.currentPosition() == stepper.targetPosition()) {
+   * This function needs this line when it's checking if it's moving in the
+   * correct direction and in correct space.
+   */
+
+  /* 
+   * these functions needs to take potmeter vals in where it should move.
+   */
   if (stepper.targetPosition() < 25 || stepper.targetPosition() > 100) {
     stepper.moveTo(100);
   }
@@ -235,6 +264,10 @@ void run(AccelStepper &stepper, boolean forward) {
 }
 
 void turnOffMotors() {
+  /*
+   * void AccelStepper::disableOutputs  (   ) 
+   * use this one instead (and enableOutputs).
+   */
   digitalWrite(3, LOW);
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
