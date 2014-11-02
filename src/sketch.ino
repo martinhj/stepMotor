@@ -19,6 +19,10 @@ char tagString[13];
 int index = 0;
 boolean reading = false;
 
+/*
+ * Test how HALF4WIRE works out instead of FULL4WIRE. Speed difference? Different 
+ * step count to get one revolution - doubled?
+ */
 AccelStepper stepper1(AccelStepper::FULL4WIRE, 3, 4, 5, 6);
 AccelStepper stepper2(AccelStepper::FULL4WIRE, 8, 9, 10, 11);
 
