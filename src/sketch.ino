@@ -248,6 +248,16 @@ boolean compareTag(char one[], char two[]){
 
 
 
+void lightLED(int pin){
+///////////////////////////////////
+//Turn on LED on pin "pin" for 250ms
+///////////////////////////////////
+  Serial.println(pin);
+
+  digitalWrite(pin, HIGH);
+  delay(250);
+  digitalWrite(pin, LOW);
+}
 
 
 
