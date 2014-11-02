@@ -53,7 +53,9 @@ void setup()
 	stepper2.setAcceleration(200.0);
 
   pinMode(RFIDResetPin, OUTPUT);
+  //digitalWrite(RFIDResetPin, LOW);
   pinMode(RFIDResetPin2, OUTPUT);
+  //digitalWrite(RFIDResetPin2, LOW);
   pinMode(ledPin, OUTPUT);
 }
 
@@ -80,7 +82,7 @@ void readCard() {
 
   /*
    * Reset position with setCurrentPosition(0) when a tag has been identified
-   * successfully.
+   * successfully (0 is the position where it is possible to read a tag).
    */
 
   Serial.println("rfid_READ");
@@ -130,9 +132,13 @@ void readCard() {
 
   checkTag(tagString); //Check if it is a match
   clearTag(tagString); //Clear the char of all value
+  digitalWrite(RFIDResetPin, LOW);
 
   stepper1.runToNewPosition(x1rfidtarget);
   stepper2.runToNewPosition(x2rfidtarget);
+
+
+  turnOnMotors();
 
 
   lastRead = millis();
@@ -146,7 +152,7 @@ void loop()
 		x1 = analogRead(2);
 		x2 = analogRead(1);
 
-    ///*
+    /*
     Serial.print(x1);
     Serial.print(" : ");
     Serial.print(x2);
@@ -160,7 +166,7 @@ void loop()
     Serial.print(stepper2.currentPosition());
 
     Serial.println();
-    //*/
+    */
 
     /*
     // Change direction at the limits
@@ -309,16 +315,20 @@ void run(AccelStepper &stepper, boolean forward) {
   }
 }
 
+void turnOnMotors() {
+  stepper1.enableOutputs();
+  stepper2.enableOutputs();
+}
 void turnOffMotors() {
   /*
    * void AccelStepper::disableOutputs  (   ) 
    * use this one instead (and enableOutputs).
    */
-  /*
+  ///*
   stepper1.disableOutputs();
   stepper2.disableOutputs();
-  */
-  ///*
+  //*/
+  /*
   digitalWrite(3, LOW);
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
@@ -327,6 +337,5 @@ void turnOffMotors() {
   digitalWrite(9, LOW);
   digitalWrite(10, LOW);
   digitalWrite(11, LOW);
-  //*/
+  */
 }
-
