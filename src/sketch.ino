@@ -1,6 +1,7 @@
 //what's left: run back to read rfid tag
 // reset the information about tag so it doesn't keep running after the tag is removed.
 // reset possiton to null when it has read a tag.
+// find a way to 'scan' the arm for tag's if it doesn't got any.
 
 // MultiStepper.pde
 // -*- mode: C++ -*-
