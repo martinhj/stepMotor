@@ -180,26 +180,45 @@ void loop()
 
 
   //Serial.println(abs(potLastRead[0] - x1) );
-  if (abs(potLastRead[0] - x1) > 6) {
-    if (stepper1.currentPosition() > 0) {
-      stepper1.moveTo(x1);
+  /*if (abs(potLastRead[1] - x1) > 6) {*/
+  /*  if (stepper1.currentPosition() > 0) {*/
+  /*    stepper1.moveTo(x1);*/
+  /*  } else {*/
+  /*    stepper1.moveTo((x1) - STEPSPERREV);*/
+  /*  }*/
+  /*  potLastRead[0] = x1;*/
+  /*  lastPotRead = millis();*/
+  /*}*/
+  potMove(stepper1, x1);
+  potMove(stepper2, x2);
+  /*if (abs(potLastRead[1] - x2) > 6) {*/
+  /*  if (stepper2.currentPosition() > 0) {*/
+  /*    stepper2.moveTo(x2);*/
+  /*  } else {*/
+  /*    stepper2.moveTo((x2) - STEPSPERREV);*/
+  /*  }*/
+  /*  potLastRead[1] = x2;*/
+  /*  lastPotRead = millis();*/
+  /*}*/
+    //if (arm[1] != -1) stepper1.run();
+    //if (arm[0] != -1) stepper2.run();
+    stepper1.run();
+    stepper2.run();
+}
+
+
+
+void potMove(AccelStepper &stepper, int potread) {
+  if (abs(potLastRead[0] - potread) > 6) {
+    if (stepper.currentPosition() > 0) {
+      stepper.moveTo(potread);
     } else {
-      stepper1.moveTo((x1) - STEPSPERREV);
+      stepper.moveTo((potread) - STEPSPERREV);
     }
-    potLastRead[0] = x1;
+    potLastRead[0] = potread;
     lastPotRead = millis();
   }
-  if (abs(potLastRead[1] - x2) > 6) {
-    if (stepper2.currentPosition() > 0) {
-      stepper2.moveTo(x2);
-    } else {
-      stepper2.moveTo((x2) - STEPSPERREV);
-    }
-    potLastRead[1] = x2;
-    lastPotRead = millis();
-  }
-    if (arm[1] != -1) stepper1.run();
-    if (arm[0] != -1) stepper2.run();
+  
 }
 
 
@@ -293,7 +312,7 @@ void readCard() {
 
 void move(AccelStepper &stepper, int pot) {
   pot = pot;
-  if (stepper.targetPosition() < pot - 50 || stepper.targetPosition() > pot + 50 
+  if (stepper.targetPosition() < pot - 50 || stepper.targetPosition() > pot + 50
     || stepper.currentPosition() == stepper.targetPosition()) {
     stepper.moveTo(pot + 50);
   }
