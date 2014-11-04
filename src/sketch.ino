@@ -386,18 +386,6 @@ void turnOnMotors() {
   stepper2.enableOutputs();
 }
 void turnOffMotors() {
-  ///*
   stepper1.disableOutputs();
   stepper2.disableOutputs();
-  //*/
-  /*
-  digitalWrite(3, LOW);
-  digitalWrite(4, LOW);
-  digitalWrite(5, LOW);
-  digitalWrite(6, LOW);
-  digitalWrite(8, LOW);
-  digitalWrite(9, LOW);
-  digitalWrite(10, LOW);
-  digitalWrite(11, LOW);
-  */
 }
