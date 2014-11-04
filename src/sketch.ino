@@ -136,9 +136,9 @@ void loop()
     }
     if (millis() - lastPotRead > 1200 && !firstRun) {
 
-      if (arm[1] == 2 || arm[1] == 3) {
+      if (arm[1] == 2 || arm[1] == 3) { // wheels
         run(stepper1, true);
-      } else if (arm[1] == 0 || arm[1] == 1) {
+      } else if (arm[1] == 0 || arm[1] == 1) { // stumps
         run(stepper1, true);
       } else {
         if (x1 > 210 && x1 <= 380) {
@@ -157,12 +157,11 @@ void loop()
       }
 
 
-      if (arm[0] == 2 || arm[0] == 3) {
+      if (arm[0] == 2 || arm[0] == 3) { // wheels
         run(stepper2, true);
-      } else if (arm[0] == 0 || arm[0] == 1) {
+      } else if (arm[0] == 0 || arm[0] == 1) { // stumps
         run(stepper2, true);
       } else {
-      
         if (x2 > 210 && x2 <= 380) {
           move(stepper2, potLastRead[1]);
         }
@@ -369,35 +368,6 @@ void lightLED(int pin){
 }
 
 
-
-void upperWave(AccelStepper &stepper) {
-  /*
-   * || stepper.currentPosition() == stepper.targetPosition()) {
-   * This function needs this line when it's checking if it's moving in the
-   * correct direction and in correct space.
-   */
-
-  if (stepper.targetPosition() < 25 || stepper.targetPosition() > 100) {
-    stepper.moveTo(100);
-  }
-  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == 100) {
-    stepper.moveTo(25);
-  }
-  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == 25)
-    stepper.moveTo(100);
-}
-
-void downerWave(AccelStepper &stepper) {
-  if (stepper.targetPosition() > 175 || stepper.targetPosition() < 100 
-    || stepper.currentPosition() == stepper.targetPosition()) {
-    stepper.moveTo(100);
-  }
-  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == 100) {
-    stepper.moveTo(175);
-  }
-  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == 175)
-    stepper.moveTo(100);
-}
 
 void stop(AccelStepper &stepper) {
   stepper.moveTo(stepper.currentPosition());
