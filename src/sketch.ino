@@ -102,7 +102,7 @@ void loop()
 		x2 = analogRead(1);
     */
 
-    /*
+    ///*
     Serial.print(x1);
     Serial.print(" : ");
     Serial.print(x2);
@@ -116,7 +116,7 @@ void loop()
     Serial.print(stepper2.currentPosition());
 
     Serial.println();
-    */
+    //*/
 
     /*
     // Change direction at the limits
@@ -132,8 +132,9 @@ void loop()
     if (lastPotRead > 100 && firstRun == true) {
       firstRun = false;
       stepper1.setCurrentPosition(0);
-      stepper2.setCurrentPosition(1);
+      stepper2.setCurrentPosition(0);
     }
+/*
     if (millis() - lastPotRead > 1200 && !firstRun) {
 
       if (arm[1] == 2 || arm[1] == 3) { // wheels
@@ -177,48 +178,92 @@ void loop()
         }
       }
     }
+    */
 
 
   //Serial.println(abs(potLastRead[0] - x1) );
-  /*if (abs(potLastRead[1] - x1) > 6) {*/
-  /*  if (stepper1.currentPosition() > 0) {*/
-  /*    stepper1.moveTo(x1);*/
-  /*  } else {*/
-  /*    stepper1.moveTo((x1) - STEPSPERREV);*/
-  /*  }*/
-  /*  potLastRead[0] = x1;*/
-  /*  lastPotRead = millis();*/
-  /*}*/
-  potMove(stepper1, x1);
-  potMove(stepper2, x2);
-  /*if (abs(potLastRead[1] - x2) > 6) {*/
-  /*  if (stepper2.currentPosition() > 0) {*/
-  /*    stepper2.moveTo(x2);*/
-  /*  } else {*/
-  /*    stepper2.moveTo((x2) - STEPSPERREV);*/
-  /*  }*/
-  /*  potLastRead[1] = x2;*/
-  /*  lastPotRead = millis();*/
-  /*}*/
-    //if (arm[1] != -1) stepper1.run();
-    //if (arm[0] != -1) stepper2.run();
-    stepper1.run();
-    stepper2.run();
+  potMove(stepper1, x1, 0);
+  potMove(stepper2, x2, 1);
+
+  
+  if (millis() - lastPotRead > 1200 && !firstRun) setPosition(stepper1, arm[0]);
+  if (millis() - lastPotRead > 1200 && !firstRun) setPosition(stepper2, arm[1]);
+
+
+
+  stepper1.run();
+  stepper2.run();
 }
 
 
 
-void potMove(AccelStepper &stepper, int potread) {
-  if (abs(potLastRead[0] - potread) > 6) {
-    if (stepper.currentPosition() > 0) {
+void potMove(AccelStepper &stepper, int potread, int pot) {
+  if (abs(potLastRead[pot] - potread) > 6) {
+    findPosition(stepper, potread);
+    potLastRead[pot] = potread;
+    lastPotRead = millis();
+  }
+}
+
+
+void setPosition(AccelStepper &stepper, int state) {
+  if (state == 0) stop(stepper);
+  if (state == 1) run(stepper, true);
+  if (state == 2) stop(stepper);
+  if (state == 3) run(stepper, false);
+  if (state == 4) stop(stepper);
+
+}
+
+
+
+void findPosition(AccelStepper &stepper, int potread) {
+    /*if (stepper.currentPosition() > 0) {
       stepper.moveTo(potread);
     } else {
       stepper.moveTo((potread) - STEPSPERREV);
-    }
-    potLastRead[0] = potread;
-    lastPotRead = millis();
+    }*/
+  int position = 0;
+  if (potread >= 0 && potread <= 50) {
+    position = 0;
+    stateChangeMotor(stepper, 0);
   }
-  
+  if (potread > 50 && potread <= 150) {
+    position = 50;
+    stateChangeMotor(stepper, 1);
+  }
+  if (potread > 150 && potread <= 250) {
+    position = 150;
+    stateChangeMotor(stepper, 2);
+  }
+  if (potread > 250 && potread <= 350) {
+    position = 250;
+    stateChangeMotor(stepper, 3);
+  }
+  if (potread > 350 && potread <= 400) {
+    position = 350;
+    stateChangeMotor(stepper, 4);
+  }
+  stepper.moveTo(position);
+}
+
+
+
+void stateChangeMotor(AccelStepper &stepper, int state) {
+  AccelStepper *steppera = &stepper;
+  AccelStepper *stepperb = &stepper1; //right
+  AccelStepper *stepperc = &stepper2; //left
+  if (steppera == stepperb) {
+    arm[0] = state;
+    Serial.print("right arm ");
+    Serial.print(state);
+  }
+  if (steppera == stepperc) {
+    arm[1] = state;
+    Serial.print("left arm ");
+    Serial.print(state);
+    Serial.print("      ");
+  }
 }
 
 
@@ -293,6 +338,7 @@ void readCard() {
       index ++;
     }
   }
+  
 
   // 1 == right
   checkTag(tagString, 1); //Check if it is a match
@@ -310,19 +356,6 @@ void readCard() {
 
 }
 
-void move(AccelStepper &stepper, int pot) {
-  pot = pot;
-  if (stepper.targetPosition() < pot - 50 || stepper.targetPosition() > pot + 50
-    || stepper.currentPosition() == stepper.targetPosition()) {
-    stepper.moveTo(pot + 50);
-  }
-  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == pot + 50) {
-    stepper.moveTo(pot - 50);
-  }
-  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == pot - 50) {
-    stepper.moveTo(pot + 50);
-  }
-}
 
 void clearTag(char one[]){
 ///////////////////////////////////
@@ -386,6 +419,21 @@ void lightLED(int pin){
   digitalWrite(pin, LOW);
 }
 
+
+
+void move(AccelStepper &stepper, int pot) {
+  pot = pot;
+  if (stepper.targetPosition() < pot - 50 || stepper.targetPosition() > pot + 50
+    || stepper.currentPosition() == stepper.targetPosition()) {
+    stepper.moveTo(pot + 50);
+  }
+  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == pot + 50) {
+    stepper.moveTo(pot - 50);
+  }
+  if (stepper.distanceToGo() == 0 && stepper.targetPosition() == pot - 50) {
+    stepper.moveTo(pot + 50);
+  }
+}
 
 
 void stop(AccelStepper &stepper) {
