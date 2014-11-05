@@ -102,15 +102,10 @@ void setup()
 void loop()
 {
   if (millis() - lastRead > 10000 && millis() - (lastPotRead[0] > 2000 || lastPotRead[1] > 2000)) readCard();
-  //readCard();
   
 
-		x1 = constrain(map(analogRead(2), 520, 1010, 0, STEPSPERREV), STEPSPERREV, 0);
+		x1 = constrain(map(analogRead(2), 520, 1010, STEPSPERREV, 0), 0, STEPSPERREV);
 		x2 = constrain(map(analogRead(1), 530, 1010, 0, STEPSPERREV), 0, STEPSPERREV);
-    /*
-    x1 = analogRead(2);
-		x2 = analogRead(1);
-    */
 
     /*
     Serial.print(x1);
@@ -128,14 +123,6 @@ void loop()
     Serial.println();
     */
 
-    /*
-    // Change direction at the limits
-    if (stepper1.distanceToGo() == 0)
-      stepper1.moveTo(-stepper1.currentPosition());
-    if (stepper2.distanceToGo() == 0)
-      stepper2.moveTo(-stepper2.currentPosition());
-    */
-
 
 
 
@@ -144,51 +131,6 @@ void loop()
       stepper1.setCurrentPosition(0);
       stepper2.setCurrentPosition(0);
     }
-/*
-    if (millis() - lastPotRead > 1200 && !firstRun) {
-
-      if (arm[1] == 2 || arm[1] == 3) { // wheels
-        run(stepper1, true);
-      } else if (arm[1] == 0 || arm[1] == 1) { // stumps
-        run(stepper1, true);
-      } else {
-        if (x1 > 210 && x1 <= 380) {
-          move(stepper1, potLastRead[0]);
-        }
-        else if (x1 > 20 && x1 <= 190) {
-          move(stepper1, potLastRead[0]);
-        }
-        else if (x1 > 380){
-          run(stepper1, true);
-        } else if (x1 <= 20 ) {
-          run(stepper1, false);
-        } else if (x1 > 190 && x1 <= 210) {
-          stop(stepper1);
-        }
-      }
-
-
-      if (arm[0] == 2 || arm[0] == 3) { // wheels
-        run(stepper2, true);
-      } else if (arm[0] == 0 || arm[0] == 1) { // stumps
-        run(stepper2, true);
-      } else {
-        if (x2 > 210 && x2 <= 380) {
-          move(stepper2, potLastRead[1]);
-        }
-        else if (x2 > 20 && x2 <= 190) {
-          move(stepper2, potLastRead[1]);
-        }
-        else if (x2 > 380) {
-          run(stepper2, true);
-        } else if (x2 <= 20 ) {
-          run(stepper2, false);
-        } else if (x2 > 190 && x2 <= 210) {
-          stop(stepper2);
-        }
-      }
-    }
-    */
 
 
   //Serial.println(abs(potLastRead[0] - x1) );
@@ -218,9 +160,9 @@ void potMove(AccelStepper &stepper, int potread, int pot) {
 
 void setPosition(AccelStepper &stepper, int state) {
   if (state == 0) stop(stepper);
-  if (state == 1) run(stepper, true);
+  if (state == 1) run(stepper, false);
   if (state == 2) move(stepper, 90, 170);
-  if (state == 3) run(stepper, false);
+  if (state == 3) run(stepper, true);
   if (state == 4) move(stepper, 0, 30);
 
 }
@@ -234,15 +176,15 @@ void findPosition(AccelStepper &stepper, int potread) {
     stateChangeMotor(stepper, 0);
   }
   if (potread > 50 && potread <= 150) { // straight forward
-    position = 60;
+    position = 40;
     stateChangeMotor(stepper, 1);
   }
   if (potread > 150 && potread <= 250) { // wave
-    position = 150;
+    position = 130;
     stateChangeMotor(stepper, 2);
   }
   if (potread > 250 && potread <= 350) { // straight backward
-    position = 210;
+    position = 190;
     stateChangeMotor(stepper, 3);
   }
   if (potread > 350 && potread <= 400) {
