@@ -47,7 +47,7 @@ boolean firstRfidRead = false;
 int potLastRead[] = {0,0};
 int potRead = 0;
 int potPort[] = {2,3};
-unsigned long lastPotRead = 0;
+unsigned long lastPotRead[] = {0,0};
 
 
 // rfid variables.
@@ -60,9 +60,17 @@ char tag01[13] = "04161F27FDD7";
 // stump
 char tag02[13] = "04161F27153F";
 // wheel
-char tag03[13] = "04161F285471";
+char tag03[13] = "04161F27E4CE";
 // wheel
 char tag04[13] = "04161F271933";
+// hand
+char tag05[13] = "04161F268AA1";
+// hand
+char tag06[13] = "04161F27F3D9";
+// glow
+char tag07[13] = "04161F285471";
+// glow
+char tag08[13] = "04161F276E44";
 int ledPin = 13;
 char tagString[13];
 int index = 0;
@@ -71,8 +79,8 @@ boolean reading = false;
 void setup()
 {  
   Serial.begin(9600);
-  stepper1.setPinsInverted(true, true, true);
-  stepper2.setPinsInverted(true, true, true);
+  //stepper1.setPinsInverted(true, true, true);
+  //stepper2.setPinsInverted(true, true, true);
 
 	stepper1.setMaxSpeed(350.0);
 	stepper1.setAcceleration(500.0);
@@ -85,6 +93,7 @@ void setup()
   pinMode(RFIDResetPin2, OUTPUT);
   digitalWrite(RFIDResetPin2, LOW);
   pinMode(ledPin, OUTPUT);
+  readCard();
 }
 
 
@@ -92,11 +101,11 @@ void setup()
 
 void loop()
 {
-  if (millis() - lastRead > 10000 && millis() - lastPotRead > 2000) readCard();
+  if (millis() - lastRead > 10000 && millis() - (lastPotRead[0] > 2000 || lastPotRead[1] > 2000)) readCard();
   //readCard();
   
 
-		x1 = constrain(map(analogRead(2), 520, 1010, 0, STEPSPERREV), 0, STEPSPERREV);
+		x1 = constrain(map(analogRead(2), 520, 1010, 0, STEPSPERREV), STEPSPERREV, 0);
 		x2 = constrain(map(analogRead(1), 530, 1010, 0, STEPSPERREV), 0, STEPSPERREV);
     /*
     x1 = analogRead(2);
@@ -130,7 +139,7 @@ void loop()
 
 
 
-    if ((lastPotRead > 100 || firstRfidRead == true) && firstRun == true) {
+    if (((lastPotRead[0] > 100|| lastPotRead[1] > 100) || firstRfidRead == true) && firstRun == true) {
       firstRun = false;
       stepper1.setCurrentPosition(0);
       stepper2.setCurrentPosition(0);
@@ -187,8 +196,8 @@ void loop()
   potMove(stepper2, x2, 1);
 
   
-  if (millis() - lastPotRead > 1200 && !firstRun) setPosition(stepper1, arm[0]);
-  if (millis() - lastPotRead > 1200 && !firstRun) setPosition(stepper2, arm[1]);
+  if (millis() - lastPotRead[0] > 2200 && !firstRun) setPosition(stepper1, arm[0]);
+  if (millis() - lastPotRead[1] > 2200 && !firstRun) setPosition(stepper2, arm[1]);
 
 
 
@@ -202,7 +211,7 @@ void potMove(AccelStepper &stepper, int potread, int pot) {
   if (abs(potLastRead[pot] - potread) > 6) {
     findPosition(stepper, potread);
     potLastRead[pot] = potread;
-    lastPotRead = millis();
+    lastPotRead[pot] = millis();
   }
 }
 
@@ -210,39 +219,34 @@ void potMove(AccelStepper &stepper, int potread, int pot) {
 void setPosition(AccelStepper &stepper, int state) {
   if (state == 0) stop(stepper);
   if (state == 1) run(stepper, true);
-  if (state == 2) move(stepper, 100, 200);
+  if (state == 2) move(stepper, 90, 170);
   if (state == 3) run(stepper, false);
-  if (state == 4) move(stepper, 0, 10);
+  if (state == 4) move(stepper, 0, 30);
 
 }
 
 
 
 void findPosition(AccelStepper &stepper, int potread) {
-    /*if (stepper.currentPosition() > 0) {
-      stepper.moveTo(potread);
-    } else {
-      stepper.moveTo((potread) - STEPSPERREV);
-    }*/
   int position = 0;
   if (potread >= 0 && potread <= 50) {
     position = 0;
     stateChangeMotor(stepper, 0);
   }
-  if (potread > 50 && potread <= 150) {
-    position = 50;
+  if (potread > 50 && potread <= 150) { // straight forward
+    position = 60;
     stateChangeMotor(stepper, 1);
   }
-  if (potread > 150 && potread <= 250) {
+  if (potread > 150 && potread <= 250) { // wave
     position = 150;
     stateChangeMotor(stepper, 2);
   }
-  if (potread > 250 && potread <= 350) {
-    position = 250;
+  if (potread > 250 && potread <= 350) { // straight backward
+    position = 210;
     stateChangeMotor(stepper, 3);
   }
   if (potread > 350 && potread <= 400) {
-    position = 350;
+    position = 250;
     stateChangeMotor(stepper, 4);
   }
   if (stepper.currentPosition() < 0) {
@@ -322,7 +326,7 @@ void readCard() {
     }
   }
   // 0 == left
-  checkTag(tagString, 0);
+  checkTag(tagString, 1);
   clearTag(tagString);
 
   index = 0;
@@ -345,7 +349,7 @@ void readCard() {
   
 
   // 1 == right
-  checkTag(tagString, 1); //Check if it is a match
+  checkTag(tagString, 0); //Check if it is a match
   clearTag(tagString); //Clear the char of all value
   digitalWrite(RFIDResetPin, LOW);
 
@@ -376,27 +380,67 @@ void checkTag(char tag[], int armn){
 //Check the read tag against known tags
 ///////////////////////////////////
 
-  if(strlen(tag) == 0) return; //empty, no need to contunue
+  if(strlen(tag) == 0) {
+    Serial.println("no tag");
+    return; //empty, no need to contunue
+  }
 
   if(compareTag(tag, tag01)){
     Serial.print("stump");
     arm[armn] = 1; // stump
     firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
+
   }
   if(compareTag(tag, tag02)){
     Serial.print("stump");
     arm[armn] = 1; // stump
     firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
   }
   if(compareTag(tag, tag03)){
     Serial.print("wheel");
     arm[armn] = 1; // wheel
     firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
   }
   if(compareTag(tag, tag04)){
     Serial.print("wheel");
     arm[armn] = 1; // wheel
     firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
+  }
+  if(compareTag(tag, tag05)){ // hand
+    Serial.print("hand");
+    arm[armn] = 2; 
+    firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
+  }
+  if(compareTag(tag, tag06)){ // hand
+    Serial.print("hand");
+    arm[armn] = 2; 
+    firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
+  }
+  if(compareTag(tag, tag07)){ // glow
+    Serial.print("glow");
+    arm[armn] = 4; 
+    firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
+  }
+  if(compareTag(tag, tag08)){ // glow
+    Serial.print("glow");
+    arm[armn] = 4; 
+    firstRfidRead = true;
+    if (armn == 0) stepper1.setCurrentPosition(0);
+    if (armn == 1) stepper2.setCurrentPosition(0);
   }
   /*else {*/
   /*  arm[armn] = 0; // no tag*/
