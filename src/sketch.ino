@@ -171,6 +171,8 @@ void setPosition(AccelStepper &stepper, int state) {
 
 void findPosition(AccelStepper &stepper, int potread) {
   int position = 0;
+	position = potread;
+	/*
   if (potread >= 0 && potread <= 50) {
     position = 0;
     stateChangeMotor(stepper, 0);
@@ -195,6 +197,7 @@ void findPosition(AccelStepper &stepper, int potread) {
     stepper.moveTo(potread - STEPSPERREV);
   }
   stepper.moveTo(position);
+	*/
 }
 
 
