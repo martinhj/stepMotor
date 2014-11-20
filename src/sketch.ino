@@ -172,32 +172,31 @@ void setPosition(AccelStepper &stepper, int state) {
 void findPosition(AccelStepper &stepper, int potread) {
   int position = 0;
 	position = potread;
-	/*
   if (potread >= 0 && potread <= 50) {
-    position = 0;
+    //position = 0;
     stateChangeMotor(stepper, 0);
   }
   if (potread > 50 && potread <= 150) { // straight forward
-    position = 40;
+    //position = 40;
     stateChangeMotor(stepper, 1);
   }
   if (potread > 150 && potread <= 250) { // wave
-    position = 130;
+    //position = 130;
     stateChangeMotor(stepper, 2);
   }
   if (potread > 250 && potread <= 350) { // straight backward
-    position = 190;
+    //position = 190;
     stateChangeMotor(stepper, 3);
   }
   if (potread > 350 && potread <= 400) {
-    position = 250;
+    //position = 250;
     stateChangeMotor(stepper, 4);
   }
   if (stepper.currentPosition() < 0) {
     stepper.moveTo(potread - STEPSPERREV);
+  } else {
+    stepper.moveTo(position);
   }
-  stepper.moveTo(position);
-	*/
 }
 
 
